@@ -1,0 +1,4 @@
+{
+  "_comment": "Danh sách IP được phép chỉnh sửa. Dùng '*' để cho phép tất cả.",
+  "allowedIPs": ["*"]
+}

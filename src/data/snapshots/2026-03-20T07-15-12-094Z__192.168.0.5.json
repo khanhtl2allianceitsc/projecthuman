@@ -1,0 +1,344 @@
+{
+  "members": [
+    {
+      "id": "m1773988237022",
+      "name": "Ngô Minh Hưng",
+      "role": "Backend Developer",
+      "color": "#84cc16",
+      "avatar": "NMH"
+    },
+    {
+      "id": "m1773988449470",
+      "name": "Bùi Minh Dũng",
+      "role": "Backend Developer",
+      "color": "#84cc16",
+      "avatar": "MDB"
+    },
+    {
+      "id": "m1773988504870",
+      "name": "Trần Thị Hồng Nhung",
+      "role": "QA Engineer",
+      "color": "#bfacec",
+      "avatar": "HN"
+    },
+    {
+      "id": "m1773988530197",
+      "name": "Nguyễn Trọng Phúc",
+      "role": "AI Developer",
+      "color": "#ef4444",
+      "avatar": "NTP"
+    },
+    {
+      "id": "m1773988594637",
+      "name": "Tống Nguyễn Hoàng Trung",
+      "role": "Backend Developer",
+      "color": "#10b981",
+      "avatar": "TNH"
+    },
+    {
+      "id": "m1773988796627",
+      "name": "Lê Ngọc Minh",
+      "role": "Frontend Developer",
+      "color": "#8b5cf6",
+      "avatar": "NM"
+    },
+    {
+      "id": "m1773988805491",
+      "name": "Lê Xuân Khanh",
+      "role": "AI Developer",
+      "color": "#06b6d4",
+      "avatar": "LXK"
+    },
+    {
+      "id": "m1773990331486",
+      "name": "Nguyễn Thị Bích Vân",
+      "role": "Frontend Developer",
+      "color": "#ec4899",
+      "avatar": "VB"
+    },
+    {
+      "id": "m1773990534888",
+      "name": "Đào Cẩm Thanh",
+      "role": "Full Stack Developer",
+      "color": "#14b8a6",
+      "avatar": "ĐCT"
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1773989111061",
+      "name": "Doc AI - Upgrade 2603",
+      "description": "Tăng tốc COS, làm report cho Executive team xem",
+      "status": "planning",
+      "priority": "critical",
+      "color": "#8b5cf6",
+      "startDate": "2026-03-20",
+      "endDate": "2026-04-02",
+      "members": [],
+      "progress": 0,
+      "budget": 2000000,
+      "spent": 0,
+      "tags": []
+    },
+    {
+      "id": "p1773989328670",
+      "name": "CoShare",
+      "description": "Website bán hàng và các dịch vụ, mục tiêu nâng cao chất lượng cuộc sống cho người dùng",
+      "status": "active",
+      "priority": "high",
+      "color": "#080997",
+      "startDate": "2025-11-21",
+      "endDate": "2026-05-01",
+      "members": [
+        {
+          "memberId": "m1773988504870",
+          "projectRole": "Lead"
+        },
+        {
+          "memberId": "m1773988449470",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773988237022",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773988594637",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773990331486",
+          "projectRole": "Frontend Dev"
+        },
+        {
+          "memberId": "m1773990534888",
+          "projectRole": "QA"
+        }
+      ],
+      "progress": 85,
+      "budget": 0,
+      "spent": 0,
+      "tags": []
+    },
+    {
+      "id": "p1773989456264",
+      "name": "VegaBot",
+      "description": "ChatBot có thể tích hợp vào các hệ thống có sẵn, hỗ trợ giải đáp cho người dùng",
+      "status": "active",
+      "priority": "medium",
+      "color": "#3b82f6",
+      "startDate": "2026-03-03",
+      "endDate": "2026-04-24",
+      "members": [
+        {
+          "memberId": "m1773988449470",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773988504870",
+          "projectRole": "Lead"
+        },
+        {
+          "memberId": "m1773988805491",
+          "projectRole": "AI Developer"
+        }
+      ],
+      "progress": 20,
+      "budget": 0,
+      "spent": 0,
+      "tags": []
+    },
+    {
+      "id": "p1773989896423",
+      "name": "PCO Phase 2.2",
+      "description": "Tập trung vào việc đẩy dữ liệu của BBNT lên ePacific",
+      "status": "active",
+      "priority": "medium",
+      "color": "#84cc16",
+      "startDate": "2026-03-05",
+      "endDate": "2026-03-25",
+      "members": [
+        {
+          "memberId": "m1773988449470",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773988594637",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773988504870",
+          "projectRole": "Lead"
+        }
+      ],
+      "progress": 50,
+      "budget": 0,
+      "spent": 0,
+      "tags": []
+    },
+    {
+      "id": "p1773989801486",
+      "name": "Luxcar",
+      "description": "Nằm trong hệ sinh thái Sigo với mong muốn đưa những dòng xe cao cấp tới khách hàng nên Luxcar ra đời.",
+      "status": "active",
+      "priority": "medium",
+      "color": "#8b5cf6",
+      "startDate": "2026-03-10",
+      "endDate": "2026-04-10",
+      "members": [
+        {
+          "memberId": "m1773988237022",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773988796627",
+          "projectRole": "Lead"
+        },
+        {
+          "memberId": "m1773990534888",
+          "projectRole": "QA"
+        }
+      ],
+      "progress": 2,
+      "budget": 17500000,
+      "spent": 0,
+      "tags": []
+    },
+    {
+      "id": "p1773989879446",
+      "name": "Multi AI Agent",
+      "description": "Xây dựng workflows để điều phối team các AI Agents để hoàn thành mission cụ thể",
+      "status": "active",
+      "priority": "medium",
+      "color": "#10b981",
+      "startDate": "2026-02-24",
+      "endDate": "2026-05-01",
+      "members": [
+        {
+          "memberId": "m1773988530197",
+          "projectRole": "Lead"
+        }
+      ],
+      "progress": 40,
+      "budget": 0,
+      "spent": 1000000,
+      "tags": [
+        "Python",
+        "Claude Code",
+        "Javascript"
+      ]
+    },
+    {
+      "id": "p1773990117904",
+      "name": "HRIS VIBE365",
+      "description": "",
+      "status": "active",
+      "priority": "high",
+      "color": "#27c0e5",
+      "startDate": "2026-03-01",
+      "endDate": "2026-03-27",
+      "members": [
+        {
+          "memberId": "m1773988504870",
+          "projectRole": "Lead"
+        },
+        {
+          "memberId": "m1773988449470",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773988594637",
+          "projectRole": "Backend Dev"
+        }
+      ],
+      "progress": 45,
+      "budget": 0,
+      "spent": 0,
+      "tags": []
+    },
+    {
+      "id": "p1773990504562",
+      "name": "Sigo",
+      "description": "Sàn cho thuê xe",
+      "status": "active",
+      "priority": "medium",
+      "color": "#3b82f6",
+      "startDate": "2026-01-01",
+      "endDate": "2026-12-31",
+      "members": [
+        {
+          "memberId": "m1773988796627",
+          "projectRole": "Frontend Dev"
+        },
+        {
+          "memberId": "m1773988237022",
+          "projectRole": "Backend Dev"
+        },
+        {
+          "memberId": "m1773990331486",
+          "projectRole": "Lead"
+        },
+        {
+          "memberId": "m1773990534888",
+          "projectRole": "QA"
+        }
+      ],
+      "progress": 1,
+      "budget": 0,
+      "spent": 0,
+      "tags": []
+    },
+    {
+      "id": "p1773990590742",
+      "name": "Quản lý project và tasks Phase 01",
+      "description": "",
+      "status": "planning",
+      "priority": "medium",
+      "color": "#ec4899",
+      "startDate": "2026-03-20",
+      "endDate": "2026-05-15",
+      "members": [
+        {
+          "memberId": "m1773990331486",
+          "projectRole": "Lead"
+        },
+        {
+          "memberId": "m1773988504870",
+          "projectRole": "Lead"
+        }
+      ],
+      "progress": 0,
+      "budget": 0,
+      "spent": 0,
+      "tags": []
+    },
+    {
+      "id": "p1773990708295",
+      "name": "Ajuma - Auto Post",
+      "description": "AI đề xuất content từ bài đã post FB",
+      "status": "active",
+      "priority": "medium",
+      "color": "#2256aa",
+      "startDate": "2026-01-26",
+      "endDate": "2026-03-31",
+      "members": [
+        {
+          "memberId": "m1773988805491",
+          "projectRole": "AI Developer"
+        },
+        {
+          "memberId": "m1773988530197",
+          "projectRole": "AI Developer"
+        },
+        {
+          "memberId": "m1773990331486",
+          "projectRole": "Lead"
+        }
+      ],
+      "progress": 75,
+      "budget": 0,
+      "spent": 0,
+      "tags": []
+    }
+  ]
+}

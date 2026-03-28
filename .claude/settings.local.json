@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(npx playwright:*)",
+      "Bash(curl -s \"http://192.168.0.14:3001/api/data\")",
+      "Bash(curl -s http://localhost:3001/api/ping)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s http://localhost:3001/api/data)",
+      "Bash(find . -type f -name .env*)",
+      "Bash(grep -E \"\\\\.\\(env|ts|js|yml|yaml|json\\)$\")",
+      "Bash(find /d/Clients/ProjectHuman -maxdepth 4 -type d -name *backend* -o -name *server*)",
+      "Bash(find /d/Clients/ProjectHuman/server -type f \\\\\\(-name *.ts -o -name *.js -o -name .env* -o -name *.json \\\\\\))",
+      "Bash(find /d/Clients/ProjectHuman -maxdepth 3 -type f \\\\\\(-name *.env* -o -name .env* \\\\\\))",
+      "Bash(grep -r \"process\\\\.env\\\\|PORT\\\\|VITE\" /d/Clients/ProjectHuman --include=*.ts --include=*.tsx --include=*.js --include=*.jsx -n)",
+      "Bash(grep -r \"localhost\\\\|3001\\\\|5173\\\\|API\" /d/Clients/ProjectHuman/src --include=*.ts --include=*.tsx -n)",
+      "Bash(/tmp/port_architecture_diagram.md:*)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

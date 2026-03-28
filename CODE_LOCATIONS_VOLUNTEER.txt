@@ -1,0 +1,141 @@
+================================================================================
+PROJECTHUMAN VOLUNTEER SYSTEM - EXACT CODE LOCATIONS
+================================================================================
+
+BACKEND API ROUTES (server/index.js)
+================================================================================
+
+GET /api/volunteers (Line 598-615)
+  Returns: Array of LeadVolunteer objects with joined data
+
+POST /api/volunteers (Line 618-640)
+  Validation: Checks existing Lead (line 624-627)
+  INSERT: lead_volunteers with ON CONFLICT (line 629-633)
+  Audit: VOLUNTEER_APPLY (line 635)
+
+DELETE /api/volunteers/:projectId/:memberId (Line 643-656)
+  Action: Deletes from lead_volunteers (line 648)
+  Audit: VOLUNTEER_CANCEL (line 651)
+
+PATCH /api/volunteers/:id/approve (Line 659-710)
+  Auth: IP-based admin check (lines 662-666)
+  Transaction: BEGIN/COMMIT/ROLLBACK (lines 671-701)
+    - Update status to approved (line 673)
+    - Demote old Lead to Member (line 682)
+    - Insert new Lead (line 687)
+    - Reject other pending (line 695)
+  Audit: VOLUNTEER_APPROVE (line 702)
+
+PATCH /api/volunteers/:id/reject (Line 713-730)
+  Auth: IP-based admin check (lines 715-719)
+  Action: Update status to rejected (line 722)
+  Audit: VOLUNTEER_REJECT (line 725)
+
+AUTO-ADMIN: Line 832-833 sets is_admin=TRUE for Khanh user
+DB SCHEMA: Line 819-829 creates lead_volunteers table
+
+================================================================================
+DATABASE SCHEMA
+================================================================================
+
+Table lead_volunteers (created lines 819-829 in server/index.js):
+
+  id         | SERIAL PRIMARY KEY
+  project_id | FK to projects (CASCADE)
+  member_id  | FK to members (CASCADE)
+  status     | VARCHAR(20) DEFAULT 'pending'
+  note       | TEXT
+  created_at | TIMESTAMPTZ DEFAULT NOW()
+  updated_at | TIMESTAMPTZ DEFAULT NOW()
+  UNIQUE(project_id, member_id)
+
+Related tables:
+  - projects.need_lead (BOOLEAN)
+  - projects.volunteer_deadline (TIMESTAMPTZ)
+  - project_members.project_role (updated to 'Lead')
+  - write_log (audit trail)
+
+================================================================================
+FRONTEND CONTEXT (src/context/VolunteerContext.tsx)
+================================================================================
+
+Interface (Lines 1-27): VolunteerContextValue
+  volunteers: LeadVolunteer[]
+  loading: boolean
+  refresh, apply, cancel, approve, reject, getMyVolunteer, getPendingCount
+
+refresh() - Lines 33-45: GET /api/volunteers, auto-polls 10s
+apply() - Lines 47-59: POST /api/volunteers, auto-refresh
+cancel() - Lines 61-67: DELETE /api/volunteers/{projectId}/{memberId}
+approve() - Lines 69-77: PATCH /api/volunteers/{id}/approve
+reject() - Lines 79-85: PATCH /api/volunteers/{id}/reject
+getMyVolunteer() - Lines 87-89: Find volunteer by projectId + memberId
+getPendingCount() - Lines 91-93: Count pending volunteers
+
+useVolunteer Hook - Line 102: useContext(Ctx)
+
+================================================================================
+TYPE DEFINITIONS (src/types/index.ts)
+================================================================================
+
+LeadVolunteer interface (lines 65-78):
+  id, projectId, memberId, status, note, createdAt
+  memberName, memberAvatar, memberColor, memberRole
+  projectName, projectColor
+
+Project interface (lines 36-58): needLead, volunteerDeadline
+Member interface (lines 18-34): isAdmin
+ProjectMember interface (lines 13-16): projectRole
+
+================================================================================
+MAIN UI COMPONENT (src/components/ProjectsNeedingLead.tsx)
+================================================================================
+
+NeedLeadCard component (lines 90-308):
+  Apply button (lines 214-230): onClick -> apply()
+  Pending status (lines 242-250): Shows cancel button -> cancel()
+  Rejected status (lines 252-257): Shows error message
+  Admin list (lines 260-305): Approve/Reject buttons for each pending
+    - Approve button (line 287): onClick -> approve(v.id)
+    - Reject button (line 295): onClick -> reject(v.id)
+
+Helper functions:
+  isDeadlinePassed() - lines 14-17
+  formatDeadline() - lines 19-33
+
+================================================================================
+AUDIT LOGGING (server/index.js)
+================================================================================
+
+Events logged to write_log table:
+  Line 635: VOLUNTEER_APPLY
+  Line 651: VOLUNTEER_CANCEL
+  Line 702: VOLUNTEER_APPROVE
+  Line 725: VOLUNTEER_REJECT
+
+================================================================================
+KEY GOTCHAS
+================================================================================
+
+1. Volunteer ID vs Member ID
+   - approve(id) and reject(id) use volunteer.id from lead_volunteers.id
+   - apply(projectId, memberId) and cancel() use different params
+
+2. Status values are LOWERCASE
+   - pending, approved, rejected (not Pending, Approved, Rejected)
+
+3. ON CONFLICT upsert
+   - Same project/member can re-apply
+   - Line 632: resets to pending on duplicate insert
+
+4. Previous Lead handling
+   - Line 682-684: Demotes to Member (does NOT delete)
+   - Only changes project_role in project_members
+
+5. Auto-polling every 10 seconds
+   - Frontend refresh() called by setInterval (line 43)
+
+6. Deadline is UI-only
+   - Server does NOT validate volunteerDeadline
+   - Only UI disables apply button after deadline passes
+

@@ -1,0 +1,133 @@
+ProjectHuman Codebase Scout Report - FINDINGS
+==============================================
+
+KEY COMPONENTS FOUND:
+==============================================
+
+1. PROJECTS NEEDING LEAD SECTION
+===================================
+FILE: src/components/ProjectsNeedingLead.tsx (289 lines)
+LOCATION: Dashboard, section ID '#section-need-lead'
+
+KEY LOGIC:
+const noLeadProjects = data.projects.filter(
+  p => p.status !== 'completed'
+    && !p.members.some(m => m.projectRole === 'Lead')
+);
+
+FEATURES:
+- Responsive grid (1/2/3 cols)
+- Volunteer count badge with pulse animation
+- Real-time deadline countdown
+- Member avatars display
+- Status badges (active, planning, paused, completed)
+- Apply button: 'Toi muon lam Lead'
+- Admin volunteer approval interface (expandable)
+- Dark/light theme support
+- Vietnamese UI text
+- Animations
+
+2. PROJECT CARDS COMPONENT
+===================================
+FILE: src/components/ProjectCards.tsx (272 lines)
+PURPOSE: Display ALL projects with comprehensive details
+
+DIFFERENCES:
+- ProjectsNeedingLead: Only projects needing Lead
+- ProjectCards: ALL projects with full metadata
+
+FEATURES:
+- Lead section with member info or warning
+- Status + Priority badges
+- Progress bar with gradient
+- Budget tracking with percentage
+- Timeline (start date -> end date)
+- Member avatars with role indicators
+- Admin volunteer UI
+
+3. MODAL COMPONENTS
+===================================
+3.1 WHO ARE YOU MODAL
+FILE: src/components/WhoAreYouModal.tsx (326 lines)
+- Portal-based modal (z-index 300)
+- Purpose: User picks existing member or creates new
+- Two tabs: Pick / Add new
+- Backdrop blur + Escape key support
+
+3.2 FORM MODAL
+FILE: src/components/admin/FormModal.tsx (56 lines)
+- Portal-based overlay (z-index 200)
+- Reusable modal wrapper for admin forms
+- Features: Escape key, click-outside close, scrollable
+
+4. ROUTES
+===================================
+FILE: src/App.tsx (199 lines)
+
+Routes:
+/ -> Dashboard (main)
+/personnel -> PersonnelPage
+/team -> TeamPage
+
+Dashboard Section Order:
+1. Header
+2. Filter Bar
+3. Timeline & Deadline
+4. Lead Statistics
+5. *** DU AN CAN LEAD *** (section ID: #section-need-lead)
+6. Project Overview
+7. Personnel x Projects
+8. Team profiles
+
+5. DATA TYPES
+===================================
+File: src/types/index.ts
+
+Project Interface:
+- id, name, description
+- status, priority, color
+- startDate, endDate
+- members (ProjectMember[])
+- progress, budget, spent, tags
+- needLead?: boolean
+- volunteerDeadline?: string
+
+LeadVolunteer Interface:
+- id, projectId, memberId
+- status: 'pending' | 'approved' | 'rejected'
+- note, createdAt
+- memberName, memberAvatar, memberColor, memberRole
+
+6. CONTEXT PROVIDERS
+===================================
+
+VolunteerContext (src/context/VolunteerContext.tsx)
+Methods:
+- apply(projectId, memberId, note?)
+- cancel(projectId, memberId)
+- approve(id) - Admin approve
+- reject(id) - Admin reject
+- getMyVolunteer(projectId, memberId)
+
+API Endpoints:
+- GET /api/volunteers
+- POST /api/volunteers
+- DELETE /api/volunteers/:projectId/:memberId
+- PATCH /api/volunteers/:id/approve
+- PATCH /api/volunteers/:id/reject
+
+IdentityContext: currentUser, setIdentity(), logout()
+DataContext: data, loading, canEdit
+ThemeContext: theme, toggleTheme()
+
+7. SUMMARY
+===================================
+
+Primary Components:
+- ProjectsNeedingLead.tsx: Volunteer Lead section
+- ProjectCards.tsx: All project cards
+- WhoAreYouModal.tsx: Identity picker
+- FormModal.tsx: Admin forms wrapper
+- App.tsx: Routes + Dashboard layout
+
+Report complete - showing content:

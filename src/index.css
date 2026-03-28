@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0f0f1a;
+  color: #e2e8f0;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+#root { min-height: 100vh; width: 100%; }
+
+/* ── Scrollbar dark ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #1a1a2e; }
+::-webkit-scrollbar-thumb { background: #4a4a6a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6a6a9a; }
+
+/* ── Scrollbar light ── */
+:root:not(.dark) ::-webkit-scrollbar-track { background: #e2e8f0; }
+:root:not(.dark) ::-webkit-scrollbar-thumb { background: #94a3b8; }
+
+.recharts-tooltip-wrapper { outline: none !important; }
+
+.animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+.animate-slide-up { animation: slideUp 0.4s ease-out; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════
+   glass-card
+══════════════════════════════════ */
+.dark .glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+:root:not(.dark) .glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+
+.gantt-bar { transition: all 0.3s ease; }
+.gantt-bar:hover { filter: brightness(1.15); }
+
+/* ── shared input style ── */
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  outline: none;
+}
+.input-field:focus {
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.25);
+}
+.dark .input-field {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
+  color: #e2e8f0;
+}
+.dark .input-field::placeholder { color: #475569; }
+.dark .input-field option { background: #1e1b4b; }
+:root:not(.dark) .input-field {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #1e293b;
+}
+:root:not(.dark) .input-field::placeholder { color: #94a3b8; }
+
+
+/* ══════════════════════════════════
+   LIGHT MODE — global colour overrides
+   Targets every component without touching each file
+══════════════════════════════════ */
+:root:not(.dark) {
+
+  /* headings & strong text */
+  .text-white   { color: #1e293b !important; }
+
+  /* slate scale — remap to warmer light tones */
+  .text-slate-100 { color: #1e293b !important; }
+  .text-slate-200 { color: #334155 !important; }
+  .text-slate-300 { color: #475569 !important; }
+  .text-slate-400 { color: #64748b !important; }
+  .text-slate-500 { color: #94a3b8 !important; }
+  .text-slate-600 { color: #94a3b8 !important; }
+
+  /* card backgrounds */
+  .bg-white\/\[0\.02\],
+  .bg-white\/\[0\.03\],
+  .bg-white\/\[0\.04\]  { background: rgba(0,0,0,0.02) !important; }
+
+  /* borders */
+  .border-white\/5  { border-color: rgba(0,0,0,0.06) !important; }
+  .border-white\/8  { border-color: rgba(0,0,0,0.08) !important; }
+  .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
+  .border-white\/15 { border-color: rgba(0,0,0,0.1)  !important; }
+
+  /* inner track bg in charts/bars */
+  .bg-white\/5  { background: rgba(0,0,0,0.05) !important; }
+  .bg-white\/10 { background: rgba(0,0,0,0.06) !important; }
+
+  /* recharts – grid lines & axis text */
+  .recharts-cartesian-grid-horizontal line,
+  .recharts-cartesian-grid-vertical   line { stroke: rgba(0,0,0,0.08) !important; }
+  .recharts-text { fill: #64748b !important; }
+
+  /* polar grid (radar) */
+  .recharts-polar-grid-concentric-polygon { stroke: rgba(0,0,0,0.1) !important; }
+  .recharts-polar-angle-axis-tick-value   { fill: #64748b !important; }
+  .recharts-polar-radius-axis-tick        { fill: #94a3b8 !important; }
+
+  /* tooltip overrides */
+  .bg-slate-800\/95 {
+    background: rgba(255,255,255,0.96) !important;
+    border-color: rgba(0,0,0,0.12) !important;
+  }
+  .bg-slate-800\/95 .text-white,
+  .bg-slate-800\/95 .text-slate-300,
+  .bg-slate-800\/95 .text-slate-400 { color: #1e293b !important; }
+
+  /* matrix empty cell */
+  .bg-white\/\[0\.02\] { background: rgba(0,0,0,0.03) !important; }
+
+  /* avatar border */
+  .border-slate-900 { border-color: #f1f5f9 !important; }
+}

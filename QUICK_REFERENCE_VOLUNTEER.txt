@@ -1,0 +1,199 @@
+================================================================================
+                    PROJECTHUMAN VOLUNTEER SYSTEM
+                         QUICK REFERENCE CARD
+================================================================================
+
+EXACT FILE PATHS
+================
+Backend:
+  • /d/Clients/ProjectHuman/server/index.js (API routes: lines 598-730)
+  • /d/Clients/ProjectHuman/server/schema.sql (Schema)
+
+Frontend:
+  • /d/Clients/ProjectHuman/src/context/VolunteerContext.tsx
+  • /d/Clients/ProjectHuman/src/types/index.ts (LeadVolunteer: lines 65-78)
+  • /d/Clients/ProjectHuman/src/components/ProjectsNeedingLead.tsx
+  • /d/Clients/ProjectHuman/src/components/LeadStats.tsx
+
+================================================================================
+API ENDPOINTS (all in server/index.js)
+================================================================================
+
+1. GET /api/volunteers (Line 598)
+   Returns: Array of LeadVolunteer objects
+
+2. POST /api/volunteers (Line 618)
+   Body: { projectId, memberId, note? }
+   Returns: { ok: true }
+
+3. DELETE /api/volunteers/:projectId/:memberId (Line 643)
+   Returns: { ok: true }
+
+4. PATCH /api/volunteers/:id/approve (Line 659)
+   Auth: Admin only (IP-based)
+   Returns: { ok: true }
+   Action: Sets status to approved, makes new Lead, rejects other pending
+
+5. PATCH /api/volunteers/:id/reject (Line 713)
+   Auth: Admin only (IP-based)
+   Returns: { ok: true }
+   Action: Sets status to rejected
+
+================================================================================
+DATABASE SCHEMA
+================================================================================
+
+Table: lead_volunteers
+
+  id          | SERIAL PRIMARY KEY
+  project_id  | FK to projects (CASCADE)
+  member_id   | FK to members (CASCADE)
+  status      | pending | approved | rejected (default: pending)
+  note        | TEXT (application message)
+  created_at  | TIMESTAMPTZ (default: NOW())
+  updated_at  | TIMESTAMPTZ (default: NOW())
+  UNIQUE(project_id, member_id)
+
+Related Fields:
+  • projects.need_lead (BOOLEAN)
+  • projects.volunteer_deadline (TIMESTAMPTZ)
+  • project_members.project_role (updated to 'Lead' on approval)
+
+================================================================================
+FRONTEND CONTEXT METHODS
+================================================================================
+
+VolunteerContext methods (./src/context/VolunteerContext.tsx):
+
+  apply(projectId, memberId, note?)
+    → POST /api/volunteers
+
+  cancel(projectId, memberId)
+    → DELETE /api/volunteers/{projectId}/{memberId}
+
+  approve(id)
+    → PATCH /api/volunteers/{id}/approve
+
+  reject(id)
+    → PATCH /api/volunteers/{id}/reject
+
+  getMyVolunteer(projectId, memberId)
+    → LeadVolunteer | undefined
+
+  getPendingCount()
+    → number
+
+  refresh()
+    → GET /api/volunteers (auto-poll every 10 seconds)
+
+================================================================================
+VOLUNTEER TYPE
+================================================================================
+
+interface LeadVolunteer {
+  id: number
+  projectId: string
+  memberId: string
+  status: 'pending' | 'approved' | 'rejected'
+  note: string
+  createdAt: string
+  memberName: string
+  memberAvatar: string
+  memberColor: string
+  memberRole: string
+  projectName: string
+  projectColor: string
+}
+
+================================================================================
+WORKFLOW
+================================================================================
+
+USER APPLIES:
+  1. Views project with needLead=true and deadline not passed
+  2. Clicks "Tôi muốn làm Lead" button
+  3. Calls apply(projectId, memberId)
+  4. Status: pending
+  5. Can withdraw via cancel()
+
+ADMIN APPROVES:
+  1. Views pending applications in ProjectsNeedingLead component
+  2. Clicks checkmark to approve
+  3. Calls approve(volunteerId)
+  4. Actions:
+     • Sets status to 'approved'
+     • Makes member 'Lead' in project_members
+     • Demotes previous Lead to 'Member'
+     • Rejects all other pending for same project
+     • Atomic transaction (BEGIN/COMMIT/ROLLBACK)
+
+ADMIN REJECTS:
+  1. Clicks X button
+  2. Calls reject(volunteerId)
+  3. Sets status to 'rejected'
+
+================================================================================
+KEY FACTS
+================================================================================
+
+✓ No random selection - explicit admin approval required
+✓ One Lead per project - approving auto-demotes previous Lead
+✓ Auto-reject pending - when one approved, others auto-rejected
+✓ IP-based auth - uses user_identities table lookup, not sessions
+✓ Soft deadline - optional volunteerDeadline, UI disables apply after
+✓ Atomic approvals - uses BEGIN/COMMIT/ROLLBACK transactions
+✓ Auto-polling - frontend refreshes every 10 seconds
+✓ Audit logging - all actions logged to write_log table
+
+================================================================================
+AUDIT EVENTS
+================================================================================
+
+VOLUNTEER_APPLY    - User applies to be Lead
+VOLUNTEER_CANCEL   - User withdraws application
+VOLUNTEER_APPROVE  - Admin approves (logged with volunteerId, projectId, memberId)
+VOLUNTEER_REJECT   - Admin rejects (logged with volunteerId)
+
+All logged to: write_log table with IP, timestamp, detail, snapshot
+
+================================================================================
+UI COMPONENTS
+================================================================================
+
+ProjectsNeedingLead.tsx (main UI):
+  • Shows projects without Lead
+  • "Tôi muốn làm Lead" button for users
+  • Admin panel: expand/collapse pending volunteer list
+  • Per volunteer: approve (checkmark) + reject (X)
+
+LeadStats.tsx (analytics):
+  • Lead per member bar chart
+  • Projects without Lead alert
+  • No approve/reject actions
+
+================================================================================
+AUTHORIZATION
+================================================================================
+
+Admin Check:
+  SELECT is_admin FROM user_identities ui 
+    JOIN members m ON m.id=ui.member_id 
+    WHERE ui.ip=$1
+
+On Startup:
+  Sets is_admin=TRUE for member matching:
+    • name ILIKE '%Trương Lê Khánh%'
+    • name ILIKE '%Truong Le Khanh%'
+
+================================================================================
+NOTES
+================================================================================
+
+• All error messages in Vietnamese
+• Status strings: pending, approved, rejected (lowercase)
+• Frontend polls every 10 seconds automatically
+• One app per member per project (UNIQUE constraint)
+• Cascading delete on project/member deletion
+• Project Lead role is managed via project_members.project_role
+
+================================================================================
