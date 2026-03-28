@@ -64,7 +64,7 @@ if (cluster.isPrimary) {
   // Pool per-worker: 5 connections × 8 workers = 40 total DB connections
   const pool = new pg.Pool(
     process.env.DATABASE_URL
-      ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, max: 5 }
+      ? { connectionString: process.env.DATABASE_URL, ssl: false, max: 5 }
       : { connectionString: 'postgresql://ph_app:PhApp2026xK9mRqSecure@42.119.236.229:5432/projecthuman', max: 5, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000 }
   );
   pool.on('error', e => console.error(`[W${process.pid}] DB pool error:`, e.message));
