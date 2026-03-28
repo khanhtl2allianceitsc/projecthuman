@@ -93,6 +93,16 @@ if (cluster.isPrimary) {
     return raw.replace(/^::ffff:/, '');
   }
 
+  function isLanIP(ip) {
+    return (
+      ip === '::1' ||
+      ip.startsWith('127.') ||
+      ip.startsWith('10.') ||
+      ip.startsWith('192.168.') ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(ip)
+    );
+  }
+
   function canEdit(ip) {
     const { allowedIPs } = loadConfig();
     if (!Array.isArray(allowedIPs)) return false;
@@ -324,6 +334,12 @@ if (cluster.isPrimary) {
   // ══════════════════════════════════════════════════════════════════════════
   // ROUTES
   // ══════════════════════════════════════════════════════════════════════════
+
+  // GET /api/network-info — check LAN vs WAN
+  app.get('/api/network-info', (req, res) => {
+    const ip = getClientIP(req);
+    res.json({ ip, isLan: isLanIP(ip) });
+  });
 
   // GET /api/data — read-only
   app.get('/api/data', async (req, res) => {

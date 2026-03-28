@@ -1,5 +1,5 @@
 import './index.css';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { DataProvider, useData } from './context/DataContext';
@@ -18,6 +18,7 @@ import MemberProfiles from './components/MemberProfiles';
 import LeadStats from './components/LeadStats';
 import WhoAreYouModal from './components/WhoAreYouModal';
 import ProjectsNeedingLead from './components/ProjectsNeedingLead';
+import { Shield, Lock } from 'lucide-react';
 
 function SectionDivider({ label }: { label: string }) {
   return (
@@ -181,6 +182,25 @@ function Dashboard() {
 }
 
 export default function App() {
+  const [isLan, setIsLan] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch('/api/network-info')
+      .then(r => r.json())
+      .then(d => setIsLan(d.isLan))
+      .catch(() => setIsLan(false));
+  }, []);
+
+  // Đang check
+  if (isLan === null) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a]">
+      <div className="w-5 h-5 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+    </div>
+  );
+
+  // WAN — chặn, hiện thông báo
+  if (!isLan) return <WanGate />;
+
   return (
     <ThemeProvider>
       <DataProvider>
@@ -196,6 +216,41 @@ export default function App() {
         </IdentityProvider>
       </DataProvider>
     </ThemeProvider>
+  );
+}
+
+function WanGate() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] p-4">
+      <div className="flex flex-col items-center gap-6 max-w-sm w-full text-center">
+        {/* Icon */}
+        <div className="relative">
+          <div className="w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+            <Shield className="w-10 h-10 text-purple-400" />
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-lg bg-red-500/15 border border-red-500/25 flex items-center justify-center">
+            <Lock className="w-3.5 h-3.5 text-red-400" />
+          </div>
+        </div>
+
+        {/* Text */}
+        <div className="space-y-2">
+          <h1 className="text-white font-bold text-xl">Truy cập bị hạn chế</h1>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            Hệ thống này chỉ dành cho thành viên nội bộ.<br />
+            Vui lòng đăng nhập để tiếp tục.
+          </p>
+        </div>
+
+        {/* Coming soon badge */}
+        <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+          <p className="text-slate-500 text-xs">Tính năng đăng nhập sẽ sớm ra mắt</p>
+        </div>
+
+        {/* Alliance branding */}
+        <p className="text-slate-600 text-xs">Alliance Project Hub</p>
+      </div>
+    </div>
   );
 }
 
