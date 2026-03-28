@@ -7,6 +7,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import pg from 'pg';
 import multer from 'multer';
+import { OAuth2Client } from 'google-auth-library';
+import jwt from 'jsonwebtoken';
+
+const GOOGLE_CLIENT_ID = '1023397775782-32jvd8eolkhr7m7famrgtqc1mv9209ch.apps.googleusercontent.com';
+const JWT_SECRET       = process.env.JWT_SECRET || 'ph_jwt_secret_2026_xK9mRq';
+const googleClient     = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const __dirname   = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_FILE = path.resolve(__dirname, './config.json');
@@ -339,6 +345,42 @@ if (cluster.isPrimary) {
   app.get('/api/network-info', (req, res) => {
     const ip = getClientIP(req);
     res.json({ ip, isLan: isLanIP(ip) });
+  });
+
+  // POST /api/auth/google — verify Google credential, issue JWT
+  app.post('/api/auth/google', async (req, res) => {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: 'Missing credential' });
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      const user = {
+        email:   payload.email,
+        name:    payload.name,
+        picture: payload.picture,
+        sub:     payload.sub,
+      };
+      const token = jwt.sign(user, JWT_SECRET, { expiresIn: '7d' });
+      res.json({ token, user });
+    } catch (e) {
+      res.status(401).json({ error: 'Invalid Google credential' });
+    }
+  });
+
+  // GET /api/auth/me — verify JWT, return user info
+  app.get('/api/auth/me', (req, res) => {
+    const auth = req.headers['authorization'] ?? '';
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+    if (!token) return res.status(401).json({ error: 'No token' });
+    try {
+      const user = jwt.verify(token, JWT_SECRET);
+      res.json({ user });
+    } catch {
+      res.status(401).json({ error: 'Invalid token' });
+    }
   });
 
   // GET /api/data — read-only

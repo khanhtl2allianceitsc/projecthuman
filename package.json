@@ -15,11 +15,14 @@
     "test:report": "playwright show-report tests/report"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.4",
     "@types/recharts": "^1.8.29",
     "concurrently": "^9.2.1",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
     "express": "^5.2.1",
+    "google-auth-library": "^10.6.2",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.577.0",
     "multer": "^2.1.1",
     "pg": "^8.20.0",
@@ -31,6 +34,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.58.2",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

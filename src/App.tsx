@@ -1,10 +1,12 @@
 import './index.css';
 import { useState, useMemo, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { DataProvider, useData } from './context/DataContext';
 import { IdentityProvider, useIdentity } from './context/IdentityContext';
 import { VolunteerProvider } from './context/VolunteerContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import PersonnelPage from './pages/PersonnelPage';
 import TeamPage from './pages/TeamPage';
 import RafflePage from './pages/RafflePage';
@@ -18,7 +20,9 @@ import MemberProfiles from './components/MemberProfiles';
 import LeadStats from './components/LeadStats';
 import WhoAreYouModal from './components/WhoAreYouModal';
 import ProjectsNeedingLead from './components/ProjectsNeedingLead';
-import { Shield, Lock } from 'lucide-react';
+import { Shield, Lock, Loader2 } from 'lucide-react';
+
+const GOOGLE_CLIENT_ID = '1023397775782-32jvd8eolkhr7m7famrgtqc1mv9209ch.apps.googleusercontent.com';
 
 function SectionDivider({ label }: { label: string }) {
   return (
@@ -67,7 +71,7 @@ function FilterBar({ myOnly, onToggle, disabled }: { myOnly: boolean; onToggle: 
   );
 }
 
-function Dashboard() {
+function Dashboard({ loggedInUser, onLogout }: { loggedInUser?: { name: string; picture: string; email: string }; onLogout?: () => void }) {
   const { theme } = useTheme();
   const { data, loading } = useData();
   const { currentUser, identityLoading } = useIdentity();
@@ -124,6 +128,24 @@ function Dashboard() {
 
       <div className="relative z-10 max-w-[1600px] mx-auto px-4 pb-24">
         <Header data={data} />
+
+        {/* WAN user info bar */}
+        {loggedInUser && (
+          <div className="flex items-center justify-between gap-3 mt-3 px-4 py-2 rounded-xl dark:bg-white/[0.03] bg-slate-50 border dark:border-white/8 border-slate-200">
+            <div className="flex items-center gap-2">
+              <img src={loggedInUser.picture} className="w-6 h-6 rounded-full" alt={loggedInUser.name} />
+              <span className="text-xs dark:text-slate-400 text-slate-500">
+                Đăng nhập: <span className="font-semibold dark:text-slate-200 text-slate-700">{loggedInUser.name}</span>
+              </span>
+            </div>
+            <button
+              onClick={onLogout}
+              className="text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
+            >
+              Đăng xuất
+            </button>
+          </div>
+        )}
 
         <FilterBar myOnly={myOnly} onToggle={() => setMyOnly(v => !v)} disabled={!currentUser} />
 
@@ -191,17 +213,15 @@ export default function App() {
       .catch(() => setIsLan(false));
   }, []);
 
-  // Đang check
+  // Đang check network
   if (isLan === null) return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a]">
       <div className="w-5 h-5 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
     </div>
   );
 
-  // WAN — chặn, hiện thông báo
-  if (!isLan) return <WanGate />;
-
-  return (
+  // LAN — full access
+  if (isLan) return (
     <ThemeProvider>
       <DataProvider>
         <IdentityProvider>
@@ -217,9 +237,57 @@ export default function App() {
       </DataProvider>
     </ThemeProvider>
   );
+
+  // WAN — cần đăng nhập Google
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <WanGate />
+      </AuthProvider>
+    </GoogleOAuthProvider>
+  );
 }
 
 function WanGate() {
+  const { user, login, logout, loading } = useAuth();
+
+  const handleSuccess = async (credentialResponse: { credential?: string }) => {
+    if (!credentialResponse.credential) return;
+    try {
+      await login(credentialResponse.credential);
+    } catch {
+      alert('Đăng nhập thất bại. Vui lòng thử lại.');
+    }
+  };
+
+  // Đang check token
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a]">
+      <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
+    </div>
+  );
+
+  // Đã đăng nhập → load app
+  if (user) return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <ThemeProvider>
+        <DataProvider>
+          <IdentityProvider>
+            <VolunteerProvider>
+              <Routes>
+                <Route path="/" element={<Dashboard loggedInUser={user} onLogout={logout} />} />
+                <Route path="/personnel" element={<PersonnelPage />} />
+                <Route path="/team" element={<TeamPage />} />
+                <Route path="/raffle/:projectId" element={<RafflePage />} />
+              </Routes>
+            </VolunteerProvider>
+          </IdentityProvider>
+        </DataProvider>
+      </ThemeProvider>
+    </GoogleOAuthProvider>
+  );
+
+  // Chưa đăng nhập → màn hình login
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] p-4">
       <div className="flex flex-col items-center gap-6 max-w-sm w-full text-center">
@@ -235,20 +303,26 @@ function WanGate() {
 
         {/* Text */}
         <div className="space-y-2">
-          <h1 className="text-white font-bold text-xl">Truy cập bị hạn chế</h1>
+          <h1 className="text-white font-bold text-xl">Alliance Project Hub</h1>
           <p className="text-slate-400 text-sm leading-relaxed">
-            Hệ thống này chỉ dành cho thành viên nội bộ.<br />
-            Vui lòng đăng nhập để tiếp tục.
+            Hệ thống nội bộ — đăng nhập bằng tài khoản Google để tiếp tục
           </p>
         </div>
 
-        {/* Coming soon badge */}
-        <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10">
-          <p className="text-slate-500 text-xs">Tính năng đăng nhập sẽ sớm ra mắt</p>
+        {/* Google Login button */}
+        <div className="w-full flex justify-center">
+          <GoogleLogin
+            onSuccess={handleSuccess}
+            onError={() => alert('Đăng nhập thất bại')}
+            theme="filled_black"
+            shape="rectangular"
+            size="large"
+            text="signin_with"
+            locale="vi"
+          />
         </div>
 
-        {/* Alliance branding */}
-        <p className="text-slate-600 text-xs">Alliance Project Hub</p>
+        <p className="text-slate-600 text-xs">Alliance Project Hub • Internal</p>
       </div>
     </div>
   );
