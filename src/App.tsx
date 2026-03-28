@@ -351,7 +351,6 @@ function WanGate() {
             shape="rectangular"
             size="large"
             text="signin_with"
-            locale="vi"
           />
         </div>
         <p className="text-slate-600 text-xs">Alliance Project Hub • Internal</p>
