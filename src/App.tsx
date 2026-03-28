@@ -18,7 +18,6 @@ import MemberProjectMatrix from './components/MemberProjectMatrix';
 import ProjectStatusPie from './components/ProjectStatusPie';
 import MemberProfiles from './components/MemberProfiles';
 import LeadStats from './components/LeadStats';
-import WhoAreYouModal from './components/WhoAreYouModal';
 import WanIdentityModal from './components/WanIdentityModal';
 import ProjectsNeedingLead from './components/ProjectsNeedingLead';
 import { Shield, Lock, Loader2 } from 'lucide-react';
@@ -123,9 +122,6 @@ function Dashboard({ loggedInUser, onLogout }: { loggedInUser?: { name: string; 
           backgroundSize: '60px 60px',
         }}
       />
-
-      {/* Who are you? — hiện khi chưa có identity */}
-      {!currentUser && <WhoAreYouModal />}
 
       <div className="relative z-10 max-w-[1600px] mx-auto px-4 pb-24">
         <Header data={data} />

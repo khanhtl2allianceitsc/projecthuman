@@ -1,4 +1,4 @@
-import { Users, FolderKanban, TrendingUp, Crown, Sun, Moon, LogOut, Bell, ChevronRight, Settings, Pencil, UserSquare2, Shuffle, X, Plus, Trash2 } from 'lucide-react';
+import { Users, FolderKanban, TrendingUp, Crown, Sun, Moon, Bell, ChevronRight, Settings, Pencil, UserSquare2, Shuffle, X, Plus, Trash2 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -21,7 +21,7 @@ interface HeaderProps {
 
 export default function Header({ data }: HeaderProps) {
   const { theme, toggle } = useTheme();
-  const { currentUser, clearIdentity } = useIdentity();
+  const { currentUser } = useIdentity();
   const { getPendingCount } = useVolunteer();
   const { data: allData } = useData();
   const navigate = useNavigate();
@@ -133,13 +133,6 @@ export default function Header({ data }: HeaderProps) {
                       {pendingCount}
                     </span>
                   )}
-                </button>
-                <button
-                  onClick={clearIdentity}
-                  title="Đổi người dùng"
-                  className="opacity-50 hover:opacity-100 transition-opacity"
-                >
-                  <LogOut className="w-3 h-3 dark:text-slate-400 text-slate-500" />
                 </button>
               </div>
             )}
