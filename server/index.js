@@ -71,7 +71,7 @@ if (cluster.isPrimary) {
   const pool = new pg.Pool(
     process.env.DATABASE_URL
       ? { connectionString: process.env.DATABASE_URL, ssl: false, max: 5 }
-      : { connectionString: 'postgresql://ph_app:PhApp2026xK9mRqSecure@42.119.236.229:5432/projecthuman', max: 5, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000 }
+      : { connectionString: 'postgresql://postgres:dKgNcytAqakAlNMFuXrFfbIRYPmWTzVW@gondola.proxy.rlwy.net:36213/railway', ssl: false, max: 5, idleTimeoutMillis: 30000, connectionTimeoutMillis: 10000 }
   );
   pool.on('error', e => console.error(`[W${process.pid}] DB pool error:`, e.message));
 
