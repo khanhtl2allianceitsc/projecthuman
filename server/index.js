@@ -423,9 +423,9 @@ if (cluster.isPrimary) {
     if (!m.id || !m.name) return res.status(400).json({ error: 'Missing id or name' });
     await withTx(res, async (c) => {
       await c.query(
-        `INSERT INTO members (id, name, role, color, avatar, man_month, created_by_ip, updated_by_ip, created_at, updated_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$7,NOW(),NOW())`,
-        [m.id, m.name, m.role || '', m.color || '#6366f1', m.avatar || '', m.manMonth || 0, ip]
+        `INSERT INTO members (id, name, role, color, avatar, man_month, email, created_by_ip, updated_by_ip, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8,NOW(),NOW())`,
+        [m.id, m.name, m.role || '', m.color || '#6366f1', m.avatar || '', m.manMonth || 0, m.email || null, ip]
       );
       await appendLog('ADD_MEMBER', ip, `id:${m.id} name:${m.name}`);
       return bumpTimestamp(c);
@@ -439,9 +439,9 @@ if (cluster.isPrimary) {
     const m = req.body;
     await withTx(res, async (c) => {
       const r = await c.query(
-        `UPDATE members SET name=$2, role=$3, color=$4, avatar=$5, man_month=$6, updated_by_ip=$7, updated_at=NOW()
+        `UPDATE members SET name=$2, role=$3, color=$4, avatar=$5, man_month=$6, email=$7, updated_by_ip=$8, updated_at=NOW()
          WHERE id=$1 RETURNING id`,
-        [id, m.name, m.role || '', m.color || '#6366f1', m.avatar || '', m.manMonth || 0, ip]
+        [id, m.name, m.role || '', m.color || '#6366f1', m.avatar || '', m.manMonth || 0, m.email || null, ip]
       );
       if (!r.rowCount) throw new Error(`Member ${id} không tồn tại`);
       await appendLog('UPDATE_MEMBER', ip, `id:${id}`);
