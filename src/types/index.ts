@@ -21,6 +21,7 @@ export interface Member {
   avatar: string;
   role: string;
   color: string;
+  email?: string;
   manMonth?: number;
   isAdmin?: boolean;
   // Images

@@ -142,6 +142,7 @@ if (cluster.isPrimary) {
     const [mRows, pRows, pmRows, meta] = await Promise.all([
       c.query(`SELECT id, name, role, color, avatar, is_admin AS "isAdmin",
                       man_month AS "manMonth",
+                      email,
                       avatar_url   AS "avatarUrl",
                       portrait_url AS "portraitUrl",
                       created_by_ip AS "createdByIp",
@@ -381,6 +382,24 @@ if (cluster.isPrimary) {
     } catch {
       res.status(401).json({ error: 'Invalid token' });
     }
+  });
+
+  // GET /api/members/by-email?email=xxx — tìm member theo email
+  app.get('/api/members/by-email', async (req, res) => {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ error: 'Missing email' });
+    const row = await pool.query('SELECT id FROM members WHERE email = $1', [email]);
+    if (row.rows.length === 0) return res.json({ memberId: null });
+    res.json({ memberId: row.rows[0].id });
+  });
+
+  // PATCH /api/members/:id/link-email — gắn email vào member
+  app.patch('/api/members/:id/link-email', async (req, res) => {
+    const { id } = req.params;
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Missing email' });
+    await pool.query('UPDATE members SET email=$1, updated_at=NOW() WHERE id=$2', [email, id]);
+    res.json({ ok: true });
   });
 
   // GET /api/data — read-only
@@ -1135,6 +1154,7 @@ if (cluster.isPrimary) {
         )
       `);
       await pool.query(`ALTER TABLE members ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE`);
+      await pool.query(`ALTER TABLE members ADD COLUMN IF NOT EXISTS email VARCHAR(255)`);
       await pool.query(`
         CREATE TABLE IF NOT EXISTS lead_volunteers (
           id         SERIAL       PRIMARY KEY,

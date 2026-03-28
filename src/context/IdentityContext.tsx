@@ -20,17 +20,31 @@ interface IdentityContextValue {
 
 const IdentityContext = createContext<IdentityContextValue | null>(null);
 
-export function IdentityProvider({ children }: { children: ReactNode }) {
+export function IdentityProvider({ children, initialMemberId }: { children: ReactNode; initialMemberId?: string }) {
   const [currentUser, setCurrentUser] = useState<IdentityInfo | null>(null);
   const [identityLoading, setIdentityLoading] = useState(true);
 
   useEffect(() => {
+    if (initialMemberId) {
+      // WAN login: auto set identity từ memberId đã link qua email
+      fetch(`${API}/api/identity`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId: initialMemberId }),
+      })
+        .then(() => fetch(`${API}/api/identity`))
+        .then(r => r.json())
+        .then(data => setCurrentUser(data.identity ?? null))
+        .catch(() => setCurrentUser(null))
+        .finally(() => setIdentityLoading(false));
+      return;
+    }
     fetch(`${API}/api/identity`)
       .then(r => r.json())
       .then(data => setCurrentUser(data.identity ?? null))
       .catch(() => setCurrentUser(null))
       .finally(() => setIdentityLoading(false));
-  }, []);
+  }, [initialMemberId]);
 
   const setIdentity = useCallback(async (memberId: string) => {
     await fetch(`${API}/api/identity`, {

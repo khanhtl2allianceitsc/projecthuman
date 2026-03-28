@@ -19,6 +19,7 @@ import ProjectStatusPie from './components/ProjectStatusPie';
 import MemberProfiles from './components/MemberProfiles';
 import LeadStats from './components/LeadStats';
 import WhoAreYouModal from './components/WhoAreYouModal';
+import WanIdentityModal from './components/WanIdentityModal';
 import ProjectsNeedingLead from './components/ProjectsNeedingLead';
 import { Shield, Lock, Loader2 } from 'lucide-react';
 
@@ -209,7 +210,11 @@ export default function App() {
   useEffect(() => {
     fetch('/api/network-info')
       .then(r => r.json())
-      .then(d => setIsLan(d.isLan))
+      .then(d => {
+        // ?wan=1 → force WAN mode để test login
+        const forceWan = new URLSearchParams(window.location.search).get('wan') === '1';
+        setIsLan(forceWan ? false : d.isLan);
+      })
       .catch(() => setIsLan(false));
   }, []);
 
@@ -250,36 +255,70 @@ export default function App() {
 
 function WanGate() {
   const { user, login, logout, loading } = useAuth();
+  const [linkedMemberId, setLinkedMemberId] = useState<string | null | undefined>(undefined);
+  const [members, setMembers] = useState<import('./types').Member[]>([]);
+  const [showIdentity, setShowIdentity] = useState(false);
+
+  // Sau khi login → kiểm tra email đã link member chưa
+  useEffect(() => {
+    if (!user) { setLinkedMemberId(undefined); return; }
+    fetch(`/api/members/by-email?email=${encodeURIComponent(user.email)}`)
+      .then(r => r.json())
+      .then(d => {
+        setLinkedMemberId(d.memberId ?? null);
+        if (!d.memberId) {
+          // Chưa link → fetch danh sách members để chọn
+          fetch('/api/data').then(r => r.json()).then(data => setMembers(data.members));
+          setShowIdentity(true);
+        }
+      })
+      .catch(() => setLinkedMemberId(null));
+  }, [user]);
+
+  const handleLinkIdentity = async (memberId: string) => {
+    await fetch(`/api/members/${memberId}/link-email`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user!.email }),
+    });
+    setLinkedMemberId(memberId);
+    setShowIdentity(false);
+  };
 
   const handleSuccess = async (credentialResponse: { credential?: string }) => {
     if (!credentialResponse.credential) return;
-    try {
-      await login(credentialResponse.credential);
-    } catch {
-      alert('Đăng nhập thất bại. Vui lòng thử lại.');
-    }
+    try { await login(credentialResponse.credential); }
+    catch { alert('Đăng nhập thất bại. Vui lòng thử lại.'); }
   };
 
-  // Đang check token
-  if (loading) return (
+  if (loading || (user && linkedMemberId === undefined)) return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a]">
       <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
     </div>
   );
 
-  // Đã đăng nhập → load app
   if (user) return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <ThemeProvider>
         <DataProvider>
-          <IdentityProvider>
+          <IdentityProvider initialMemberId={linkedMemberId ?? undefined}>
             <VolunteerProvider>
-              <Routes>
-                <Route path="/" element={<Dashboard loggedInUser={user} onLogout={logout} />} />
-                <Route path="/personnel" element={<PersonnelPage />} />
-                <Route path="/team" element={<TeamPage />} />
-                <Route path="/raffle/:projectId" element={<RafflePage />} />
-              </Routes>
+              <>
+                {showIdentity && members.length > 0 && (
+                  <WanIdentityModal
+                    members={members}
+                    googleName={user.name}
+                    googleEmail={user.email}
+                    onSelect={handleLinkIdentity}
+                  />
+                )}
+                <Routes>
+                  <Route path="/" element={<Dashboard loggedInUser={user} onLogout={logout} />} />
+                  <Route path="/personnel" element={<PersonnelPage />} />
+                  <Route path="/team" element={<TeamPage />} />
+                  <Route path="/raffle/:projectId" element={<RafflePage />} />
+                </Routes>
+              </>
             </VolunteerProvider>
           </IdentityProvider>
         </DataProvider>
@@ -287,11 +326,9 @@ function WanGate() {
     </GoogleOAuthProvider>
   );
 
-  // Chưa đăng nhập → màn hình login
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] p-4">
       <div className="flex flex-col items-center gap-6 max-w-sm w-full text-center">
-        {/* Icon */}
         <div className="relative">
           <div className="w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
             <Shield className="w-10 h-10 text-purple-400" />
@@ -300,16 +337,12 @@ function WanGate() {
             <Lock className="w-3.5 h-3.5 text-red-400" />
           </div>
         </div>
-
-        {/* Text */}
         <div className="space-y-2">
           <h1 className="text-white font-bold text-xl">Alliance Project Hub</h1>
           <p className="text-slate-400 text-sm leading-relaxed">
             Hệ thống nội bộ — đăng nhập bằng tài khoản Google để tiếp tục
           </p>
         </div>
-
-        {/* Google Login button */}
         <div className="w-full flex justify-center">
           <GoogleLogin
             onSuccess={handleSuccess}
@@ -321,7 +354,6 @@ function WanGate() {
             locale="vi"
           />
         </div>
-
         <p className="text-slate-600 text-xs">Alliance Project Hub • Internal</p>
       </div>
     </div>
