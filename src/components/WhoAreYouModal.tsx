@@ -23,7 +23,7 @@ export default function WhoAreYouModal() {
   const { setIdentity } = useIdentity();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const API = `http://${window.location.hostname}:4000`;
+  const API = ``;
 
   const [mode, setMode]         = useState<Mode>('pick');
   const [search, setSearch]     = useState('');
@@ -76,7 +76,7 @@ export default function WhoAreYouModal() {
         avatar: initials(newName.trim()),
       };
       await addMember(tempMember);
-      const res = await fetch(`http://${window.location.hostname}:4000/api/data`);
+      const res = await fetch(`/api/data`);
       const freshData = await res.json();
       const added = (freshData.members as Member[]).find(
         m => m.name === tempMember.name && m.role === tempMember.role

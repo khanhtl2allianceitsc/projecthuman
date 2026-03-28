@@ -197,7 +197,7 @@ function NeedLeadCard({ project, data, onShowDetail }: { project: Project; data:
                 style={{ background: m.color }}
               >
                 {m.avatarUrl
-                  ? <img src={`http://${window.location.hostname}:4000${m.avatarUrl}`} className="w-full h-full object-cover" alt={m.name} />
+                  ? <img src={`${m.avatarUrl}`} className="w-full h-full object-cover" alt={m.name} />
                   : m.avatar.slice(0, 2)
                 }
               </div>
@@ -505,7 +505,7 @@ function ProjectDetailModal({
                       style={{ background: m.color }}
                     >
                       {m.avatarUrl
-                        ? <img src={`http://${window.location.hostname}:4000${m.avatarUrl}`} className="w-full h-full object-cover" alt={m.name} />
+                        ? <img src={`${m.avatarUrl}`} className="w-full h-full object-cover" alt={m.name} />
                         : m.avatar.slice(0, 2)
                       }
                     </div>

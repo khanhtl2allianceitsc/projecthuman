@@ -5,7 +5,7 @@ import { Edit2, Trash2, UserPlus, Search, X, Upload, ImageIcon } from 'lucide-re
 import AuditBadge from '../AuditBadge';
 import FormModal from './FormModal';
 
-const API = `http://${window.location.hostname}:4000`;
+const API = ``;
 
 const PRESET_COLORS = [
   '#8b5cf6','#06b6d4','#10b981','#f59e0b',

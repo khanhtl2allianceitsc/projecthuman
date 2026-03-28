@@ -6,7 +6,7 @@ interface MemberProfilesProps {
   data: DashboardData;
 }
 
-const API = `http://${window.location.hostname}:4000`;
+const API = ``;
 
 const ROLE_COLORS: Record<string, string> = {
   Lead: '#f59e0b',

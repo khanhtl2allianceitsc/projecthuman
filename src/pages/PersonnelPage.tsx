@@ -107,7 +107,7 @@ const fmtCompact = (v: number) =>
   new Intl.NumberFormat('vi-VN', { notation: 'compact', maximumFractionDigits: 1 }).format(v);
 
 // ─── Avatar component ────────────────────────────────────────────────────────
-const PERSONNEL_API = `http://${window.location.hostname}:4000`;
+const PERSONNEL_API = ``;
 
 function Avatar({ member, size = 44 }: { member: Member; size?: number }) {
   return (

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { LeadVolunteer } from '../types';
 
-const API = `http://${window.location.hostname}:4000`;
+const API = ``;
 
 export interface RandomPickResult {
   winnerId: string;

@@ -5,7 +5,7 @@ import { useIdentity } from '../context/IdentityContext';
 import { useTheme } from '../context/ThemeContext';
 import { Crown, Shuffle, Sparkles, ArrowLeft, Users, Loader2, Copy, Check } from 'lucide-react';
 
-const API = `http://${window.location.hostname}:4000`;
+const API = ``;
 const SPIN_DURATION = 5000;
 
 interface Candidate {

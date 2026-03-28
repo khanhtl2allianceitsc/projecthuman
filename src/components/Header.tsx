@@ -42,7 +42,7 @@ export default function Header({ data }: HeaderProps) {
   const isAdmin = currentMember?.isAdmin ?? false;
   const pendingCount = isAdmin ? getPendingCount() : 0;
   const isDark = theme === 'dark';
-  const API = `http://${window.location.hostname}:4000`;
+  const API = ``;
 
   return (
     <header className="relative overflow-hidden">
@@ -278,7 +278,7 @@ function StatCard({ icon, label, value, sub, color }: StatCardProps) {
 const ITEM_COLORS = ['#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#f97316','#6366f1','#14b8a6','#3b82f6','#84cc16','#e879f9'];
 
 function CustomRaffleModal({ onClose, onCreated }: { onClose: () => void; onCreated: (roomId: string) => void }) {
-  const API = `http://${window.location.hostname}:4000`;
+  const API = ``;
   const [title, setTitle] = useState('');
   const [items, setItems] = useState<string[]>(['', '']);
   const [loading, setLoading] = useState(false);

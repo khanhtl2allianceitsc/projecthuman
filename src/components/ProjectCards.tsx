@@ -253,7 +253,7 @@ function ProjectCard({ project, data }: { project: Project; data: DashboardData 
               style={{ background: member.color }}
             >
               {member.avatarUrl
-                ? <img src={`http://${window.location.hostname}:4000${member.avatarUrl}`} className="w-full h-full object-cover" alt={member.name} />
+                ? <img src={`${member.avatarUrl}`} className="w-full h-full object-cover" alt={member.name} />
                 : member.avatar.slice(0, 2)
               }
               {projectRole === 'Lead' && <span className="absolute -top-1.5 -right-1.5 text-[8px]">👑</span>}

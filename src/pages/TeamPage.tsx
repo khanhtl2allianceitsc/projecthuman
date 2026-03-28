@@ -4,7 +4,7 @@ import { Crown, Briefcase, ArrowLeft, Users, ExternalLink, Sun, Moon, UserCircle
 import type { Member, Project } from '../types';
 import { useTheme } from '../context/ThemeContext';
 
-const API = `http://${window.location.hostname}:4000`;
+const API = ``;
 
 // ─── Tier ────────────────────────────────────────────────────────────────────
 interface Tier { label: string; color: string; bg: string; border: string; min: number }

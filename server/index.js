@@ -62,14 +62,11 @@ if (cluster.isPrimary) {
   // ══════════════════════════════════════════════════════════════════════
 
   // Pool per-worker: 5 connections × 8 workers = 40 total DB connections
-  const pool = new pg.Pool({
-    host: 'localhost', port: 5432,
-    user: 'postgres', password: 'postgres',
-    database: 'projecthuman',
-    max: 5,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-  });
+  const pool = new pg.Pool(
+    process.env.DATABASE_URL
+      ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, max: 5 }
+      : { host: 'localhost', port: 5432, user: 'postgres', password: 'postgres', database: 'projecthuman', max: 5, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000 }
+  );
   pool.on('error', e => console.error(`[W${process.pid}] DB pool error:`, e.message));
 
   const app = express();
@@ -77,6 +74,12 @@ if (cluster.isPrimary) {
   app.use(express.json({ limit: '2mb' }));
   // Serve uploaded images: GET /uploads/avatars/xxx.jpg
   app.use('/uploads', express.static(UPLOADS_DIR));
+
+  // Serve React build (production)
+  const DIST_DIR = path.resolve(__dirname, '../dist');
+  if (fs.existsSync(DIST_DIR)) {
+    app.use(express.static(DIST_DIR));
+  }
 
   // ── Helpers ─────────────────────────────────────────────────────────────
   function loadConfig() {
@@ -1055,7 +1058,13 @@ if (cluster.isPrimary) {
   });
 
   // ── Start worker ──────────────────────────────────────────────────────────
-  const PORT = 4000;
+  const PORT = process.env.PORT || 4000;
+  // SPA fallback — phải đặt SAU tất cả /api routes
+  if (fs.existsSync(path.resolve(__dirname, '../dist'))) {
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve(__dirname, '../dist/index.html'));
+    });
+  }
   app.listen(PORT, '0.0.0.0', async () => {
     try {
       // Auto-create tables nếu chưa có

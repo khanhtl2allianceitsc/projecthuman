@@ -6,7 +6,7 @@ import type { DashboardData } from '../types';
 import { Crown, AlertTriangle, CheckCircle2, Flame } from 'lucide-react';
 import { getStatusColor, getDaysRemaining } from '../utils/dateUtils';
 
-const LEAD_API = `http://${window.location.hostname}:4000`;
+const LEAD_API = ``;
 
 interface LeadStatsProps {
   data: DashboardData;

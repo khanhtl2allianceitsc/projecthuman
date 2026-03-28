@@ -5,5 +5,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true, // expose trên LAN
+    proxy: {
+      '/api': 'http://localhost:4000',
+      '/uploads': 'http://localhost:4000',
+    },
   },
 })

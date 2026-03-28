@@ -4,7 +4,7 @@ import {
 } from 'react';
 import type { Member } from '../types';
 
-const API = `http://${window.location.hostname}:4000`;
+const API = ``;
 
 export interface IdentityInfo extends Pick<Member, 'avatar' | 'name' | 'role' | 'color'> {
   memberId: string;

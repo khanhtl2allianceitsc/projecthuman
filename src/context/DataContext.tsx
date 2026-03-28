@@ -4,7 +4,7 @@ import {
 } from 'react';
 import type { DashboardData, Member, Project } from '../types';
 
-const API = `http://${window.location.hostname}:4000`;
+const API = ``;
 
 async function apiFetch(path: string, method = 'GET', body?: unknown) {
   const res = await fetch(`${API}${path}`, {
