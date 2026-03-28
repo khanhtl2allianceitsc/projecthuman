@@ -20,7 +20,7 @@ import MemberProfiles from './components/MemberProfiles';
 import LeadStats from './components/LeadStats';
 import WanIdentityModal from './components/WanIdentityModal';
 import ProjectsNeedingLead from './components/ProjectsNeedingLead';
-import { Shield, Lock, Loader2 } from 'lucide-react';
+import { Shield, Lock, Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
 
 const GOOGLE_CLIENT_ID = '1023397775782-32jvd8eolkhr7m7famrgtqc1mv9209ch.apps.googleusercontent.com';
 
@@ -250,10 +250,27 @@ export default function App() {
 }
 
 function WanGate() {
-  const { user, login, logout, loading } = useAuth();
+  const { user, login, loginWithPassword, logout, loading } = useAuth();
   const [linkedMemberId, setLinkedMemberId] = useState<string | null | undefined>(undefined);
   const [members, setMembers] = useState<import('./types').Member[]>([]);
   const [showIdentity, setShowIdentity] = useState(false);
+
+  // Password login state
+  const [loginMode, setLoginMode] = useState<'google' | 'password'>('google');
+  const [pwEmail, setPwEmail]       = useState('');
+  const [pwPass, setPwPass]         = useState('');
+  const [pwShowPass, setPwShowPass] = useState(false);
+  const [pwError, setPwError]       = useState('');
+  const [pwLoading, setPwLoading]   = useState(false);
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError('');
+    setPwLoading(true);
+    try { await loginWithPassword(pwEmail, pwPass); }
+    catch (err: unknown) { setPwError((err as Error).message); }
+    finally { setPwLoading(false); }
+  };
 
   // Sau khi login → kiểm tra email đã link member chưa
   useEffect(() => {
@@ -325,6 +342,7 @@ function WanGate() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] p-4">
       <div className="flex flex-col items-center gap-6 max-w-sm w-full text-center">
+        {/* Logo */}
         <div className="relative">
           <div className="w-20 h-20 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
             <Shield className="w-10 h-10 text-purple-400" />
@@ -333,22 +351,88 @@ function WanGate() {
             <Lock className="w-3.5 h-3.5 text-red-400" />
           </div>
         </div>
-        <div className="space-y-2">
+
+        <div className="space-y-1.5">
           <h1 className="text-white font-bold text-xl">Alliance Project Hub</h1>
-          <p className="text-slate-400 text-sm leading-relaxed">
-            Hệ thống nội bộ — đăng nhập bằng tài khoản Google để tiếp tục
-          </p>
+          <p className="text-slate-400 text-sm">Hệ thống nội bộ — đăng nhập để tiếp tục</p>
         </div>
-        <div className="w-full flex justify-center">
-          <GoogleLogin
-            onSuccess={handleSuccess}
-            onError={() => alert('Đăng nhập thất bại')}
-            theme="filled_black"
-            shape="rectangular"
-            size="large"
-            text="signin_with"
-          />
+
+        {/* Tab toggle */}
+        <div className="w-full flex gap-1 p-1 rounded-xl bg-white/5 border border-white/8">
+          <button
+            onClick={() => setLoginMode('google')}
+            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+              loginMode === 'google' ? 'bg-white/10 text-white shadow' : 'text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            Google
+          </button>
+          <button
+            onClick={() => setLoginMode('password')}
+            className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
+              loginMode === 'password' ? 'bg-white/10 text-white shadow' : 'text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            <KeyRound className="w-3.5 h-3.5" /> Mật khẩu
+          </button>
         </div>
+
+        {/* Google login */}
+        {loginMode === 'google' && (
+          <div className="w-full flex justify-center">
+            <GoogleLogin
+              onSuccess={handleSuccess}
+              onError={() => alert('Đăng nhập thất bại')}
+              theme="filled_black"
+              shape="rectangular"
+              size="large"
+              text="signin_with"
+            />
+          </div>
+        )}
+
+        {/* Password login */}
+        {loginMode === 'password' && (
+          <form onSubmit={handlePasswordLogin} className="w-full space-y-3">
+            <input
+              type="email"
+              required
+              value={pwEmail}
+              onChange={e => setPwEmail(e.target.value)}
+              placeholder="Email"
+              className="w-full px-4 py-2.5 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            />
+            <div className="relative">
+              <input
+                type={pwShowPass ? 'text' : 'password'}
+                required
+                value={pwPass}
+                onChange={e => setPwPass(e.target.value)}
+                placeholder="Mật khẩu"
+                className="w-full px-4 py-2.5 pr-10 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+              <button
+                type="button"
+                onClick={() => setPwShowPass(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                {pwShowPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            {pwError && (
+              <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg text-left">{pwError}</p>
+            )}
+            <button
+              type="submit"
+              disabled={pwLoading}
+              className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg,#7c3aed,#5b21b6)' }}
+            >
+              {pwLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Đăng nhập'}
+            </button>
+          </form>
+        )}
+
         <p className="text-slate-600 text-xs">Alliance Project Hub • Internal</p>
       </div>
     </div>

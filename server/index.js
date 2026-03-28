@@ -9,10 +9,26 @@ import pg from 'pg';
 import multer from 'multer';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
+import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 
 const GOOGLE_CLIENT_ID = '1023397775782-32jvd8eolkhr7m7famrgtqc1mv9209ch.apps.googleusercontent.com';
 const JWT_SECRET       = process.env.JWT_SECRET || 'ph_jwt_secret_2026_xK9mRq';
 const googleClient     = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+// ── Password helpers ──────────────────────────────────────────────────────
+function hashPassword(password) {
+  const salt = randomBytes(16).toString('hex');
+  const hash = scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+function verifyPassword(password, stored) {
+  try {
+    const [salt, hash] = stored.split(':');
+    const hashBuf   = Buffer.from(hash, 'hex');
+    const verifyBuf = scryptSync(password, salt, 64);
+    return timingSafeEqual(hashBuf, verifyBuf);
+  } catch { return false; }
+}
 
 const __dirname   = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_FILE = path.resolve(__dirname, './config.json');
@@ -381,6 +397,50 @@ if (cluster.isPrimary) {
       res.json({ user });
     } catch {
       res.status(401).json({ error: 'Invalid token' });
+    }
+  });
+
+  // POST /api/auth/password-login — đăng nhập bằng email + password
+  app.post('/api/auth/password-login', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Thiếu email hoặc mật khẩu' });
+    try {
+      const r = await pool.query(
+        `SELECT id, name, email, password_hash FROM members WHERE LOWER(email)=LOWER($1)`,
+        [email]
+      );
+      const member = r.rows[0];
+      if (!member || !member.password_hash) {
+        return res.status(401).json({ error: 'Email không tồn tại hoặc chưa được cấp mật khẩu' });
+      }
+      if (!verifyPassword(password, member.password_hash)) {
+        return res.status(401).json({ error: 'Mật khẩu không đúng' });
+      }
+      const user = { email: member.email, name: member.name, picture: '', sub: member.id };
+      const token = jwt.sign(user, JWT_SECRET, { expiresIn: '7d' });
+      res.json({ token, user });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // PATCH /api/members/:id/set-password — admin đặt mật khẩu cho member
+  app.patch('/api/members/:id/set-password', async (req, res) => {
+    const ip = getClientIP(req);
+    const identRow = await pool.query(
+      `SELECT m.is_admin FROM user_identities ui JOIN members m ON m.id=ui.member_id WHERE ui.ip=$1`,
+      [ip]
+    );
+    if (!identRow.rows[0]?.is_admin) return res.status(403).json({ error: 'Chỉ Admin mới được đặt mật khẩu' });
+    const { password } = req.body;
+    if (!password || password.length < 6) return res.status(400).json({ error: 'Mật khẩu tối thiểu 6 ký tự' });
+    try {
+      const hash = hashPassword(password);
+      await pool.query(`UPDATE members SET password_hash=$1, updated_at=NOW() WHERE id=$2`, [hash, req.params.id]);
+      await appendLog('SET_PASSWORD', ip, `member:${req.params.id}`);
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
     }
   });
 
@@ -1155,6 +1215,7 @@ if (cluster.isPrimary) {
       `);
       await pool.query(`ALTER TABLE members ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE`);
       await pool.query(`ALTER TABLE members ADD COLUMN IF NOT EXISTS email VARCHAR(255)`);
+      await pool.query(`ALTER TABLE members ADD COLUMN IF NOT EXISTS password_hash TEXT`);
       await pool.query(`
         CREATE TABLE IF NOT EXISTS lead_volunteers (
           id         SERIAL       PRIMARY KEY,

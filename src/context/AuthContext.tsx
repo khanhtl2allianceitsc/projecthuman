@@ -10,6 +10,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
   login: (credential: string) => Promise<void>;
+  loginWithPassword: (email: string, password: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
 }
@@ -50,6 +51,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u);
   };
 
+  const loginWithPassword = async (email: string, password: string) => {
+    const res = await fetch('/api/auth/password-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Đăng nhập thất bại');
+    localStorage.setItem(TOKEN_KEY, data.token);
+    setToken(data.token);
+    setUser(data.user);
+  };
+
   const logout = () => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
@@ -57,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, loginWithPassword, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
