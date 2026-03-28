@@ -1061,7 +1061,7 @@ if (cluster.isPrimary) {
   const PORT = process.env.PORT || 4000;
   // SPA fallback — phải đặt SAU tất cả /api routes
   if (fs.existsSync(path.resolve(__dirname, '../dist'))) {
-    app.get('*', (req, res) => {
+    app.get(/(.*)/, (req, res) => {
       res.sendFile(path.resolve(__dirname, '../dist/index.html'));
     });
   }
