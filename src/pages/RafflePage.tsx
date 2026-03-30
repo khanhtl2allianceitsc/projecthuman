@@ -215,7 +215,7 @@ export default function RafflePage() {
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-8">
               {candidates.map(c => (
                 <div key={c.memberId} className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-colors ${cardBg} ${cardBorder}`}>
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center text-white text-xl font-bold"
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex items-center justify-center text-white text-2xl font-bold"
                     style={{ background: c.memberColor, boxShadow: `0 4px 16px ${c.memberColor}50` }}>
                     {c.memberAvatarUrl
                       ? <img src={c.memberAvatarUrl} className="w-full h-full object-cover" alt={c.memberName} />
@@ -275,7 +275,7 @@ export default function RafflePage() {
                       transform: 'scale(0.88)',
                       opacity: 0.35,
                     }}>
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center text-white text-xl font-bold"
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden flex items-center justify-center text-white text-2xl font-bold"
                       style={{ background: c.memberColor, boxShadow: active ? `0 0 20px ${c.memberColor}80` : 'none' }}>
                       {c.memberAvatarUrl
                         ? <img src={c.memberAvatarUrl} className="w-full h-full object-cover" alt={c.memberName} />
@@ -301,7 +301,7 @@ export default function RafflePage() {
             </div>
 
             <div className="relative mt-2">
-              <div className="w-32 h-32 rounded-3xl overflow-hidden flex items-center justify-center text-white text-4xl font-bold"
+              <div className="w-40 h-40 rounded-3xl overflow-hidden flex items-center justify-center text-white text-5xl font-bold"
                 style={{ background: session.winnerColor, boxShadow: `0 0 50px ${session.winnerColor}80, 0 0 100px ${session.winnerColor}30` }}>
                 {session.winnerAvatarUrl
                   ? <img src={session.winnerAvatarUrl} className="w-full h-full object-cover" alt={session.winnerName} />
