@@ -896,7 +896,8 @@ if (cluster.isPrimary) {
       // Chọn ngẫu nhiên 1 đơn pending (server-side — kết quả nhất quán cho mọi người)
       const picked = await client.query(
         `SELECT lv.id, lv.member_id AS "memberId",
-                m.name AS "memberName", m.avatar AS "memberAvatar", m.color AS "memberColor"
+                m.name AS "memberName", m.avatar AS "memberAvatar", m.color AS "memberColor",
+                m.avatar_url AS "memberAvatarUrl"
          FROM lead_volunteers lv
          JOIN members m ON m.id = lv.member_id
          WHERE lv.project_id=$1 AND lv.status='pending'
@@ -955,7 +956,8 @@ if (cluster.isPrimary) {
         `SELECT state, title, candidates, spin_started_at AS "spinStartedAt",
                 spin_duration_ms AS "spinDurationMs",
                 winner_id AS "winnerId", winner_name AS "winnerName",
-                winner_avatar AS "winnerAvatar", winner_color AS "winnerColor"
+                winner_avatar AS "winnerAvatar", winner_color AS "winnerColor",
+                winner_avatar_url AS "winnerAvatarUrl"
          FROM raffle_sessions WHERE project_id=$1`,
         [req.params.projectId]
       );
@@ -1014,7 +1016,8 @@ if (cluster.isPrimary) {
     try {
       const vols = await pool.query(
         `SELECT lv.member_id AS "memberId", m.name AS "memberName",
-                m.avatar AS "memberAvatar", m.color AS "memberColor"
+                m.avatar AS "memberAvatar", m.color AS "memberColor",
+                m.avatar_url AS "memberAvatarUrl"
          FROM lead_volunteers lv JOIN members m ON m.id=lv.member_id
          WHERE lv.project_id=$1 AND lv.status='pending' ORDER BY lv.created_at ASC`,
         [projectId]
@@ -1052,9 +1055,9 @@ if (cluster.isPrimary) {
       try {
         await pool.query(
           `UPDATE raffle_sessions SET state='spinning', spin_started_at=$2,
-           winner_id=$3, winner_name=$4, winner_avatar=$5, winner_color=$6, updated_at=NOW()
+           winner_id=$3, winner_name=$4, winner_avatar=$5, winner_color=$6, winner_avatar_url=$7, updated_at=NOW()
            WHERE project_id=$1`,
-          [projectId, Date.now(), w.memberId, w.memberName, w.memberAvatar, w.memberColor]
+          [projectId, Date.now(), w.memberId, w.memberName, w.memberAvatar, w.memberColor, w.memberAvatarUrl || null]
         );
         await appendLog('RAFFLE_CUSTOM_SPIN', ip, `room:${projectId} winner:${w.memberName}`);
         return res.json({ ok: true });
@@ -1085,14 +1088,15 @@ if (cluster.isPrimary) {
 
       const picked = await client.query(
         `SELECT lv.id, lv.member_id AS "memberId",
-                m.name AS "memberName", m.avatar AS "memberAvatar", m.color AS "memberColor"
+                m.name AS "memberName", m.avatar AS "memberAvatar", m.color AS "memberColor",
+                m.avatar_url AS "memberAvatarUrl"
          FROM lead_volunteers lv JOIN members m ON m.id=lv.member_id
          WHERE lv.project_id=$1 AND lv.status='pending' ORDER BY RANDOM() LIMIT 1`,
         [projectId]
       );
       if (!picked.rowCount) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Không có ứng viên' }); }
 
-      const { id, memberId, memberName, memberAvatar, memberColor } = picked.rows[0];
+      const { id, memberId, memberName, memberAvatar, memberColor, memberAvatarUrl } = picked.rows[0];
       await client.query(`UPDATE lead_volunteers SET status='approved', updated_at=NOW() WHERE id=$1`, [id]);
       await client.query(`UPDATE project_members SET project_role='Member' WHERE project_id=$1 AND project_role='Lead'`, [projectId]);
       await client.query(
@@ -1108,9 +1112,9 @@ if (cluster.isPrimary) {
       // Lưu trạng thái spinning vào DB (spinStartedAt = now, winner đã xác định)
       await client.query(
         `UPDATE raffle_sessions SET state='spinning', spin_started_at=$2,
-                winner_id=$3, winner_name=$4, winner_avatar=$5, winner_color=$6, updated_at=NOW()
+                winner_id=$3, winner_name=$4, winner_avatar=$5, winner_color=$6, winner_avatar_url=$7, updated_at=NOW()
          WHERE project_id=$1`,
-        [projectId, Date.now(), memberId, memberName, memberAvatar, memberColor]
+        [projectId, Date.now(), memberId, memberName, memberAvatar, memberColor, memberAvatarUrl || null]
       );
       await bumpTimestamp(client);
       await client.query('COMMIT');
@@ -1244,9 +1248,10 @@ if (cluster.isPrimary) {
         )
       `);
       await pool.query(`ALTER TABLE raffle_sessions ADD COLUMN IF NOT EXISTS title VARCHAR(200)`);
+      await pool.query(`ALTER TABLE raffle_sessions ADD COLUMN IF NOT EXISTS winner_avatar_url TEXT`);
       // Tự động set isAdmin cho "Trương Lê Khánh"
       await pool.query(
-        `UPDATE members SET is_admin=TRUE WHERE name ILIKE '%Trương Lê Khánh%' OR name ILIKE '%Truong Le Khanh%'`
+        `UPDATE members SET is_admin=TRUE WHERE name ILIKE '%Trương Lê Khánh%' OR name ILIKE '%Truong Le Khanh%' OR LOWER(email)='khanhtl@allianceitsc.com'`
       );
       const r = await pool.query('SELECT COUNT(*) FROM members');
       console.log(`✅  Worker ${process.pid} listening :${PORT} — ${r.rows[0].count} members`);

@@ -12,6 +12,7 @@ interface Candidate {
   memberId: string;
   memberName: string;
   memberAvatar: string;
+  memberAvatarUrl?: string;
   memberColor: string;
 }
 
@@ -24,6 +25,7 @@ interface RaffleSession {
   winnerId?: string;
   winnerName?: string;
   winnerAvatar?: string;
+  winnerAvatarUrl?: string;
   winnerColor?: string;
 }
 
@@ -213,9 +215,11 @@ export default function RafflePage() {
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-8">
               {candidates.map(c => (
                 <div key={c.memberId} className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-colors ${cardBg} ${cardBorder}`}>
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold"
+                  <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-white text-xl font-bold"
                     style={{ background: c.memberColor, boxShadow: `0 4px 16px ${c.memberColor}50` }}>
-                    {c.memberAvatar}
+                    {c.memberAvatarUrl
+                      ? <img src={c.memberAvatarUrl} className="w-full h-full object-cover" alt={c.memberName} />
+                      : c.memberAvatar}
                   </div>
                   <p className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'} font-medium text-center leading-tight`}>
                     {c.memberName.split(' ').slice(-2).join(' ')}
@@ -271,9 +275,11 @@ export default function RafflePage() {
                       transform: 'scale(0.88)',
                       opacity: 0.35,
                     }}>
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold"
+                    <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-white text-xl font-bold"
                       style={{ background: c.memberColor, boxShadow: active ? `0 0 20px ${c.memberColor}80` : 'none' }}>
-                      {c.memberAvatar}
+                      {c.memberAvatarUrl
+                        ? <img src={c.memberAvatarUrl} className="w-full h-full object-cover" alt={c.memberName} />
+                        : c.memberAvatar}
                     </div>
                     <p className={`text-xs font-semibold ${active ? textPrimary : textSecondary}`}>
                       {c.memberName.split(' ').slice(-1)[0]}
@@ -295,9 +301,11 @@ export default function RafflePage() {
             </div>
 
             <div className="relative mt-2">
-              <div className="w-28 h-28 rounded-full flex items-center justify-center text-white text-4xl font-bold"
+              <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center text-white text-4xl font-bold"
                 style={{ background: session.winnerColor, boxShadow: `0 0 50px ${session.winnerColor}80, 0 0 100px ${session.winnerColor}30` }}>
-                {session.winnerAvatar}
+                {session.winnerAvatarUrl
+                  ? <img src={session.winnerAvatarUrl} className="w-full h-full object-cover" alt={session.winnerName} />
+                  : session.winnerAvatar}
               </div>
               <div className="absolute -top-3 -right-2 w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center shadow-xl">
                 <Crown className="w-5 h-5 text-amber-900" />
