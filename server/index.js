@@ -1127,12 +1127,21 @@ if (cluster.isPrimary) {
     } finally { client.release(); }
   });
 
-  // PATCH /api/members/:id/admin — toggle isAdmin (localhost only)
+  // PATCH /api/members/:id/admin — toggle isAdmin (localhost hoặc admin)
   app.patch('/api/members/:id/admin', async (req, res) => {
     const ip = getClientIP(req);
-    if (ip !== '127.0.0.1' && ip !== '::1') return res.status(403).json({ error: 'Localhost only' });
+    const isLocalhost = ip === '127.0.0.1' || ip === '::1';
+    if (!isLocalhost) {
+      // Nếu không phải localhost, yêu cầu caller phải là admin
+      const identRow = await pool.query(
+        `SELECT m.is_admin FROM user_identities ui JOIN members m ON m.id=ui.member_id WHERE ui.ip=$1`,
+        [ip]
+      );
+      if (!identRow.rows[0]?.is_admin) return res.status(403).json({ error: 'Chỉ Admin mới được cấp/thu quyền admin' });
+    }
     const { isAdmin } = req.body;
     await pool.query(`UPDATE members SET is_admin=$2 WHERE id=$1`, [req.params.id, !!isAdmin]);
+    await appendLog('TOGGLE_ADMIN', ip, `member:${req.params.id} isAdmin:${!!isAdmin}`);
     res.json({ ok: true });
   });
 

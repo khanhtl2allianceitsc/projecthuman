@@ -1,7 +1,8 @@
 import { useState, useMemo, useRef } from 'react';
 import type { Member } from '../../types';
 import { useData } from '../../context/DataContext';
-import { Edit2, Trash2, UserPlus, Search, X, Upload, ImageIcon, Mail, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { useIdentity } from '../../context/IdentityContext';
+import { Edit2, Trash2, UserPlus, Search, X, Upload, ImageIcon, Mail, KeyRound, Eye, EyeOff, ShieldCheck, ShieldOff } from 'lucide-react';
 import AuditBadge from '../AuditBadge';
 import FormModal from './FormModal';
 
@@ -267,9 +268,31 @@ export function MemberForm({ initial, onClose }: MemberFormProps) {
 
 export default function MembersTab() {
   const { data, deleteMember } = useData();
+  const { currentUser } = useIdentity();
   const [editing, setEditing] = useState<Member | null | 'new'>(null);
   const [settingPwFor, setSettingPwFor] = useState<Member | null>(null);
+  const [togglingAdmin, setTogglingAdmin] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+
+  const currentMember = data.members.find(m => m.id === currentUser?.memberId);
+  const isAdmin = currentMember?.isAdmin ?? false;
+
+  const handleToggleAdmin = async (member: Member) => {
+    const action = member.isAdmin ? 'Thu quyền Admin' : 'Cấp quyền Admin';
+    if (!confirm(`${action} cho ${member.name}?`)) return;
+    setTogglingAdmin(member.id);
+    try {
+      const res = await fetch(`${API}/api/members/${member.id}/admin`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isAdmin: !member.isAdmin }),
+      });
+      const d = await res.json();
+      if (!res.ok) alert(d.error || 'Lỗi cập nhật quyền admin');
+      else window.location.reload();
+    } catch { alert('Lỗi kết nối máy chủ'); }
+    finally { setTogglingAdmin(null); }
+  };
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -352,6 +375,11 @@ export default function MembersTab() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium dark:text-white text-slate-800 truncate">{member.name}</span>
+                  {member.isAdmin && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400 border border-purple-500/25 font-bold flex items-center gap-0.5">
+                      <ShieldCheck className="w-2.5 h-2.5" /> Admin
+                    </span>
+                  )}
                   {leadCount > 0 && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/15 text-amber-500 font-bold">👑×{leadCount}</span>
                   )}
@@ -372,6 +400,19 @@ export default function MembersTab() {
                 />
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {isAdmin && member.id !== currentUser?.memberId && (
+                  <button
+                    onClick={() => handleToggleAdmin(member)}
+                    disabled={togglingAdmin === member.id}
+                    title={member.isAdmin ? 'Thu quyền Admin' : 'Cấp quyền Admin'}
+                    className={`p-1.5 rounded-lg transition-colors ${member.isAdmin ? 'hover:bg-red-500/15' : 'hover:bg-purple-500/15'}`}
+                  >
+                    {member.isAdmin
+                      ? <ShieldOff className="w-3.5 h-3.5 text-red-400" />
+                      : <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+                    }
+                  </button>
+                )}
                 <button onClick={() => setSettingPwFor(member)}
                   title="Đặt mật khẩu"
                   className="p-1.5 rounded-lg dark:hover:bg-white/10 hover:bg-slate-100 transition-colors">
