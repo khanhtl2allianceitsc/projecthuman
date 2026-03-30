@@ -742,6 +742,7 @@ if (cluster.isPrimary) {
                lv.status, lv.note,
                TO_CHAR(lv.created_at,'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "createdAt",
                m.name AS "memberName", m.avatar AS "memberAvatar", m.color AS "memberColor", m.role AS "memberRole",
+               m.avatar_url AS "memberAvatarUrl",
                p.name AS "projectName", p.color AS "projectColor"
         FROM lead_volunteers lv
         JOIN members m ON m.id = lv.member_id

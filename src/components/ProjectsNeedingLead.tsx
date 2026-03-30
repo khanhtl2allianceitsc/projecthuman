@@ -286,10 +286,12 @@ function NeedLeadCard({ project, data, onShowDetail }: { project: Project; data:
               {pendingVols.map(v => (
                 <div key={v.id} className="flex items-center gap-2 p-2 rounded-xl dark:bg-white/[0.03] bg-slate-50">
                   <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                    className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
                     style={{ background: v.memberColor }}
                   >
-                    {v.memberAvatar}
+                    {v.memberAvatarUrl
+                      ? <img src={v.memberAvatarUrl} className="w-full h-full object-cover" alt={v.memberName} />
+                      : v.memberAvatar}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-semibold dark:text-white text-slate-800 truncate">{v.memberName}</div>

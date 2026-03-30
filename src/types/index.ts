@@ -72,6 +72,7 @@ export interface LeadVolunteer {
   createdAt: string;
   memberName: string;
   memberAvatar: string;
+  memberAvatarUrl?: string;
   memberColor: string;
   memberRole: string;
   projectName: string;

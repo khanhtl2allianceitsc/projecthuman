@@ -147,9 +147,11 @@ function ProjectCard({ project, data }: { project: Project; data: DashboardData 
                 <div className="px-3 pb-3 space-y-2 border-t border-amber-500/15">
                   {pendingVols.map(v => (
                     <div key={v.id} className="flex items-center gap-2 pt-2">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
+                      <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
                         style={{ background: v.memberColor }}>
-                        {v.memberAvatar}
+                        {v.memberAvatarUrl
+                          ? <img src={v.memberAvatarUrl} className="w-full h-full object-cover" alt={v.memberName} />
+                          : v.memberAvatar}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-semibold dark:text-white text-slate-800 truncate">{v.memberName}</div>
