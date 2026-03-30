@@ -155,7 +155,10 @@ function ProjectCard({ project, data }: { project: Project; data: DashboardData 
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-semibold dark:text-white text-slate-800 truncate">{v.memberName}</div>
-                        <div className="text-[10px] dark:text-slate-500 text-slate-400">{v.memberRole}</div>
+                        <div className="text-[10px] dark:text-slate-500 text-slate-400">
+                          {v.memberRole}
+                          {v.createdAt && <> · {new Date(v.createdAt).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}</>}
+                        </div>
                       </div>
                       <button
                         disabled={loading}
